@@ -1,62 +1,43 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Excel Project</title>
-<link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <div class="container">
-    <h1 class="title">Auto Excel Project</h1>
-    
-    <div id="preset-buttons" class="button-group">
-      <!-- JavaScriptでここにプリセットボタンが追加される -->
-    </div>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
 
-    <!-- 作業内容を追加するための入力フィールドとボタン -->
-    <div>
-      <input type="text" id="new-task-input" placeholder="新しい作業内容">
-      <button id="add-task-button">作業内容を追加</button>
-    </div>
-    
-    <div class="date-select">
-      <select class="dropdown" name="year" id="year-select">
-        <option>Year</option>
-      </select>
-      <select class="dropdown" name="month" id="month-select">
-        <option>Month</option>
-        <option value="1">1月</option>
-        <option value="2">2月</option>
-        <option value="3">3月</option>
-        <option value="4">4月</option>
-        <option value="5">5月</option>
-        <option value="6">6月</option>
-        <option value="7">7月</option>
-        <option value="8">8月</option>
-        <option value="9">9月</option>
-        <option value="10">10月</option>
-        <option value="11">11月</option>
-        <option value="12">12月</option>
-      </select>
-    </div>
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
 
-    <table id="date-table">
-      <thead>
-        <tr>
-          <th>日付</th>
-          <th>出勤</th>
-          <th>退勤</th>
-          <th>作業内容</th>
-          <th>備考欄</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- JavaScriptでここに行が追加される -->
-      </tbody>
-    </table>    
-    <button class="submit-button">送信</button>
-  </div>
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
 
-  <script src="index.js"></script>
-</body>
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>
