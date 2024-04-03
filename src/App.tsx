@@ -1,14 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import './App.css';
+import { database } from './firebaseConfig';
+import { ref, push, set, serverTimestamp, onValue, } from 'firebase/database';
 
-function TaskInput({ onAdd }) {
-  const [newTask, setNewTask] = useState('');
 
-  const handleSubmit = (event) => {
+// TaskInputのpropsの型定義
+interface TaskInputProps {
+  onAdd: (newTask: string) => void;
+}
+
+function TaskInput({ onAdd }: TaskInputProps) {
+  const [newTask, setNewTask] = useState<string>('');
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onAdd(newTask);
-    setNewTask('');
-  };
+    if (newTask.trim() !== '') {
+        // タスクをデータベースに追加
+        const tasksRef = ref(database, 'tasks');
+        const newTaskRef = push(tasksRef);
+        set(newTaskRef, {
+            name: newTask,
+            timestamp: serverTimestamp() // タスクの追加時刻
+        })
+        .then(() => {
+            console.log('新しいタスクが追加されました');
+            setNewTask('');
+        })
+        .catch((error) => {
+            console.error('タスクの追加に失敗しました', error);
+        });
+    }
+};
 
   return (
     <form onSubmit={handleSubmit}>
@@ -23,7 +45,14 @@ function TaskInput({ onAdd }) {
   );
 }
 
-function DateTable({ year, month, tasks }) {
+// DateTableのpropsの型定義
+interface DateTableProps {
+  year: number;
+  month: number;
+  tasks: string[];
+}
+
+function DateTable({ year, month, tasks }: DateTableProps) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const rows = Array.from({ length: daysInMonth }, (_, index) => {
     const day = index + 1;
@@ -34,6 +63,7 @@ function DateTable({ year, month, tasks }) {
         <td><input type="time" /></td>
         <td>
           <select>
+            <option value="">選択してください</option>
             {tasks.map((task, index) => (
               <option key={index} value={task}>{task}</option>
             ))}
@@ -69,27 +99,39 @@ function DateTable({ year, month, tasks }) {
 
 function AutoExcelApp() {
   const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState(currentYear);
-  const [month, setMonth] = useState(new Date().getMonth() + 1);
-  const [tasks, setTasks] = useState(['']);
+  const [year, setYear] = useState<number>(currentYear);
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+  const [tasks, setTasks] = useState<string[]>(['']);
 
-  const addTask = (newTask) => {
+  const addTask = (newTask: string) => {
     if (newTask && !tasks.includes(newTask)) {
       setTasks([...tasks, newTask]);
     }
   };
+
+  useEffect(() => {
+    const tasksRef = ref(database, 'tasks');
+    onValue(tasksRef, (snapshot) => {
+      const tasksData = snapshot.val();
+      const loadedTasks = [];
+      for (const key in tasksData) {
+        loadedTasks.push(tasksData[key].name);
+      }
+      setTasks(loadedTasks);
+    });
+  }, []);
 
   return (
     <div className="container">
       <h1>Auto Excel Project</h1>
       <TaskInput onAdd={addTask} />
       <div>
-        <select value={year} onChange={(e) => setYear(e.target.value)}>
+        <select value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))}>
           {[currentYear - 1, currentYear, currentYear + 1].map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
-        <select value={month} onChange={(e) => setMonth(e.target.value)}>
+        <select value={month} onChange={(e) => setMonth(parseInt(e.target.value, 10))}>
           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
             <option key={m} value={m}>{m}月</option>
           ))}
