@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:5000
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - FIREBASE_PROJECT_ID=autoexcelproject-aep
+      - FIREBASE_PRIVATE_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCoNLAUhoqophkc\nu70fwf+ctVaZG2rL67w9Fsm1So7J6b4QN2i2FWmmc5Y/u/KKlqisqq9s81g4dzfa\nDY/1tgrkrIOH4umOiXTEnSczH4CFfyaKvcYTNlFgRXXffkH+NrjJ9ZRahr9BzowD\nmMw2g1k+sPS9H4IU/gZNx8ZtmBk7ehlu3cj01jbv7cqliBtOk2uIoTL4iuejRo60\n7i3JAZGV2PvSk+hF7+GnHlFtnUrQUPOpGqPKyo89FLDUjZH1BEY85V9qG6PhIn6N\n8YNjA6tad/o3/pRFz/7J1PE7nlJr0Ttq3KTaRnHPPUphFkqKUEbznBR7rmSVsnOq\nt2T7rshJAgMBAAECggEAA6X86b0PVeAgbFCgJgexsSb3xWNkWh73WsXbQyzmUvfY\ncQaapVRqkbsxF5nOhXYGG5SqMG1IzRS85+Rianxz2Qjq43AnC7nsh/U2q/OzeHHN\nFrZODQ2hDzsCdwIIkWiDcpH6kUoZ7OX7gHp4d3g639K7xDxiOG1YGqjKI4doiLMw\nxxu4G0GTL/LcK3nVJhAGs98cgm9Ou7wqipFV7EnvB8w8jWgNCZXUesTBLwFMQYfw\n8+XQ/HMNFqDDiYn/8IT+XH4YOvTCAbhHs+Nextjw9+DmPQWxgqWLu+zFWLtkXQ7E\nV6ImI0tSArkgeXujvWIr+SmfS/Flsp6kWsmPMRTvAQKBgQDW7Sb+9nINyGURMNdP\nBZsLCjKqg3grM732mKvwfrY5f0Pqzze/wdkglIoDY5tMVNhD6OMVd+npl2tU/1ee\nh3f2k0z6VQgIeDE0GoYkEUsQewBdgG2homgbGFkprruqlghdvq8akN7syAa+zHMA\nHS1qam38xHf8bDDZwsGvfci3CQKBgQDIWdMGVCwSjHeBHeLXShv8vduCgYhONkhX\ngWb60GXwrIzmNzUtts7536lLSnvedPPfO+QxzIXIu5G8quHxLF31h3nUR5gpPGiG\neyZ1KUBWSmAW1UsoEHDqXKjX8CmvOlebPJzgvakyt/K0iBnXQPCNPEOH5qG3Tyya\nR2x7qDKXQQKBgAkjzqu7CUCizAF+JTncECrZBSyRKLQVoDdzaKRyjwdE7Tt4EnPa\nJ4SmLHRWcQ0+8m944OdR0SW45byYmz5Hnodi3jwrD4tkqRsBIcE45wtNX8eaJY9h\nG7JDR89o+dwYQ0TRThsAHCrPmtHUWfOgSgUjf4fnRv76Dt3D1X7EB5wZAoGBAJgT\nppy9M574xJVbbB5jAI9+RarwS9iiV5MkhFiJ63ceYu00pscGZmFBJq4h4ZhgSeT+\n/x3V0w8lYWBGja6VMNT4er9pgNR8KBM8U1rHbzCQ0BNE4AGPSUZ8AyW2BM4fiPQq\ntCHblR0Mh8wFKyg7AN0UC2aS59nO3VpWMMBEUfKBAoGBANIrfnhVL2YOeL3bRLxp\nICL1Kpb3PiTV4Gv8A7x0gQe8DfDlKnxgrWVQZjcfO7OC3ZY89VjBcjtpfCV17Gp1\nnQJxWQmGstA0TdU3rb6/wI8KuElo2bRlJxhB4MPUgchszLBwWfGmk7O/rc7Qlbhl\njdKtLKDVQBKTkPC6qrgGf0/N\n-----END PRIVATE KEY-----\n'
+      - FIREBASE_CLIENT_EMAIL=firebase-adminsdk-wuik1@autoexcelproject-aep.iam.gserviceaccount.com

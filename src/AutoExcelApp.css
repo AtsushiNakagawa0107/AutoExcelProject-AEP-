@@ -9,6 +9,16 @@ body {
   padding: 20px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+.header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.inputTask__box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .title {
   text-align: center;
   color: #333;
@@ -68,4 +78,8 @@ th {
 }
 tbody tr:nth-child(odd) {
   background-color: #f9f9f9;
+}
+.year{
+  font-size: 2rem;
+  font-weight: bold;
 }
