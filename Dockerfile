@@ -1,23 +1,20 @@
-# ベースイメージをNode.jsのものに指定
+# ベースイメージの指定
 FROM node:14
 
-# コンテナ内での作業ディレクトリを設定
-WORKDIR /app
+# アプリケーションディレクトリを作成
+WORKDIR /usr/src/app
 
-# package.jsonとpackage-lock.jsonをコンテナ内にコピー
-COPY package.json package-lock.json ./
+# アプリケーションの依存関係ファイルをコピー
+COPY package*.json ./
 
-# 依存関係をインストール
+# 依存関係のインストール
 RUN npm install
 
-# アプリケーションのソースコードをコンテナ内にコピー
+# アプリケーションのソースをコピー
 COPY . .
 
-# アプリケーションをビルド
-RUN npm run build
-
-# アプリケーションがリッスンするポートを指定
+# アプリをビルドするためのポートを公開
 EXPOSE 3000
 
-# アプリケーションの起動コマンドを指定
+# アプリケーションの実行
 CMD ["npm", "start"]
