@@ -45,8 +45,7 @@ def edit_excel_excel_file_flag_0(parameters):
         active_cell.number_format = 'h":"mm'
 
     # F9セル以降を編集 (作業内容)
-    for i, work_details_int in enumerate(parameters['work_details_list'], start=9):
-        work_details_str = parameters['preset_list'][work_details_int]    # プリセット情報から文字列を取得
+    for i, work_details_str in enumerate(parameters['work_details_list'], start=9):
         active_cell = new_sheet[f'F{i}']
         active_cell.value = work_details_str
     

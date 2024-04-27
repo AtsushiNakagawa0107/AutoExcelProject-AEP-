@@ -9,13 +9,12 @@ logger = func.set_logger()
 def get_request_body(request_body):
     parameters = {
         "select_excel_file_flag": request_body["select_excel_file_flag"],     # 選択されているエクセルを指定する
-        "preset_list": request_body.get("preset_list", ["アプリ作成", "UI作成", "", "", "", ""]),   # プリセットで登録されている文字列をリストに格納
         "target_year": request_body.get("target_year", "2024"),               # 提出年を指定(半角数字, 4桁)
         "target_month": request_body.get("target_month", "01"),               # 提出月を指定(半角数字, 2桁)
         "working_date_list": request_body.get("working_date_list", []),       # 出勤で入力されている文字列をリストに格納
         "closing_date_list": request_body.get("closing_date_list", []),       # 退勤で入力されている文字列をリストに格納
-        "work_details_list": request_body.get("work_details_list", []),       # 作業内容で選択されているプリセット番号を指定
-        "remarks_column_list": request_body.get("remarks_column_list", [])   # 備考で入力されている文字列をリストに格納
+        "work_details_list": request_body.get("work_details_list", []),       # 作業内容で入力されている文字列をリストに格納
+        "remarks_column_list": request_body.get("remarks_column_list", [])    # 備考で入力されている文字列をリストに格納
     }
     logger.debug("parameters : %s", parameters)
     return parameters
