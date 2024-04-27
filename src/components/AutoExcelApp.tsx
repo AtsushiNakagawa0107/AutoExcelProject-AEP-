@@ -5,6 +5,8 @@ import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
 import { collection, addDoc, serverTimestamp, Timestamp, deleteDoc, doc, setDoc, orderBy, onSnapshot, query, getDoc} from 'firebase/firestore';
 import { useNavigate, useLocation, Location } from 'react-router-dom';
+import { formatFirestoreTime } from './utils';
+import { formatFirestoreText } from './taskDisplay';
 
 const LogoutButton = () => {
   const handleLogout = () => {
@@ -68,28 +70,25 @@ interface DateTableProps {
 
 interface Entry {
   day: number;
-  checkIn: Date | string;
-  checkOut: Date | string;
+  checkIn: string | null;
+  checkOut: string | null;
   task: string;
   note: string;
 }
 
-interface FirestoreTimeEntry {
-  checkIn?: string | null;
-  checkOut?: string | null;
-}
 
-function DateTable({ year, month, tasks, entries, setEntries, userId, dataUpdated, setDataUpdated }: DateTableProps &
+function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTableProps &
   {dataUpdated: boolean; setDataUpdated: React.Dispatch<React.SetStateAction<boolean>> }) {
   const navigate = useNavigate();
+  console.log(entries)
 
   const handleEdit = (entryIndex: number) => {
     const entry = entries[entryIndex];
-    console.log(entry)
     if (!entry) {
       console.error('Entry data is undefined');
       return;
     }
+    console.log(entry)
     navigate(`/edit-time/${userId}/${year}/${month}/${entry.day - 1}`, {state: {
       entry: {
         year: year,
@@ -101,33 +100,45 @@ function DateTable({ year, month, tasks, entries, setEntries, userId, dataUpdate
     } });
   }
 
+
   useEffect(() => {
-    if (!userId) return;
-    const fetchData = async () => {
-      const attendanceDocRef = doc(db, "attendance", userId);
-      try {
-        const docSnapshot = await getDoc(attendanceDocRef);
-        const data = docSnapshot.data() || {};
-        const newEntries: Entry[] = [];
-        const daysInMonth = new Date(year, month - 1, 0).getDate();
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-          const dayData = data[dateStr] || [];
-          newEntries.push({
-            day: day,
-            checkIn: dayData.checkIn || '00:00',
-            checkOut: dayData.checkOut || '00:00',
-            task: dayData.task,
-            note: dayData.note
-          });
-        }
-        setEntries(newEntries);
-      } catch (error) {
-        console.error("Failed to fetch data", error);
+    if (!userId || !year || !month) {
+      console.error("必要なパラメータがありません");
+      return;
+    }
+  
+    const adjustedMonth = month.toString().padStart(2, '0');
+    const attendanceDocRef = doc(db, "attendance", `${userId}-${year}-${adjustedMonth}`);
+    
+    const unsubscribe = onSnapshot(attendanceDocRef, (docSnapshot) => {
+      if (!docSnapshot.exists()) {
+        console.error("ドキュメントが存在しません");
+        setEntries([]);
+        return;
       }
-    };
-    fetchData();
-  }, [year, month, userId, db, dataUpdated, setDataUpdated]);
+
+      console.log(docSnapshot.data())
+
+      const data = docSnapshot.data();
+      const entriesFromDb = data.entries || {};
+
+      const sortedKeys = Object.keys(entriesFromDb).sort((a, b) => {
+        return new Date(a).getTime() - new Date(b).getTime();
+      });
+
+      const newEntries = sortedKeys.map((key) => {
+        const entry = entriesFromDb[key];
+        return {
+          day: parseInt(key.split('-')[2]),
+          ...entry
+        };
+      });
+
+      setEntries(newEntries);
+    });
+
+    return () => unsubscribe();
+  }, [userId, year, month, db]);
 
 
   const handleChange = (index: number, field: string, value: string) => {
@@ -135,37 +146,6 @@ function DateTable({ year, month, tasks, entries, setEntries, userId, dataUpdate
     newEntries[index] = {...newEntries[index], [field]: value};
     setEntries(newEntries);
   };
-
-
-
-  const formatFirestoreTime = (time: string | null): string => {
-    console.log(time)
-    if (!time) {
-      return '00:00';
-    }
-    const [hours, minutes] = time.split(':').map((t) => t.padStart(2, '0'));
-    return `${hours}:${minutes}`;
-  };
-
-  const [entry, setEntry] = useState<FirestoreTimeEntry | null>(null);
-
-  const getFormattedTimesFromEntry = (entry: FirestoreTimeEntry): { formattedCheckIn: string; formattedCheckOut: string} => {
-    const formattedCheckIn = entry.checkIn ? formatFirestoreTime(entry.checkIn) : '00:00';
-    const formattedCheckOut = entry.checkOut ? formatFirestoreTime(entry.checkOut) : '00:00';
-    console.log(formattedCheckIn)
-    return { formattedCheckIn, formattedCheckOut };
-  }
-
-  let formattedCheckIn = '00:00';
-  let formattedCheckOut = '00:00';
-
-  if (entry) {
-    const formattedTimes = getFormattedTimesFromEntry(entry);
-    formattedCheckIn = formattedTimes.formattedCheckIn;
-    formattedCheckOut = formattedTimes.formattedCheckOut;
-  }
-
-
 
   return (
     <table>
@@ -183,6 +163,8 @@ function DateTable({ year, month, tasks, entries, setEntries, userId, dataUpdate
         {entries.map((entry, index) => {
           const formattedStartTime = formatFirestoreTime(entry.checkIn);
           const formattedEndTime = formatFirestoreTime(entry.checkOut);
+          const formattedTask = formatFirestoreText(entry.task);
+          const formattedNote = formatFirestoreText(entry.note);
           return (
             <tr key={index}>
               <td>{`${month}月${entry.day}日`}</td>
@@ -195,14 +177,16 @@ function DateTable({ year, month, tasks, entries, setEntries, userId, dataUpdate
                     <option value={task} key={taskIdx}>{task}</option>
                   ))}
                 </select>
+                {entry.task && <div className='db-value'>{formattedTask}</div>}
               </td>
               <td>
-                <select>
+                <select value={entry.note || ''} onChange={(e) => handleChange(index, 'note', e.target.value)}>
                   <option value="通常">通常</option>
                   <option value="有給">有給</option>
                   <option value="遅刻">遅刻</option>
                   <option value="早退">早退</option>
                 </select>
+                {entry.note && <div className='db-value'>{formattedNote}</div>}
               </td>
               <td>
                 <button onClick={() => handleEdit(entry.day)}>修正</button>
@@ -249,16 +233,61 @@ function AutoExcelApp() {
     await deleteDoc(doc(db, "tasks", taskId));
   };
 
-  const handleTableSave = async (entries: any) => {
+  const createDefaultEntriesForMonth = async (userId: string, year: number, month: number) => {
+    const docRef = doc(db, "attendance", `${userId}-${year}-${month.toString().padStart(2, '0')}`);
+    const docSnapshot = await getDoc(docRef);
+
+    if (!docSnapshot.exists()) {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const defaultEntries: Record<string, any> = {};
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        defaultEntries[dateStr] = {
+          checkIn: '00:00',
+          checkOut: '00:00',
+          task: '',
+          note: '',
+        };
+      }
+      await setDoc(docRef, { entries: defaultEntries });
+    }
+  };
+
+  const handleMonthChange = (newMonth: number) => {
+    setMonth(newMonth);
+    if (userId) {
+      createDefaultEntriesForMonth(userId, year, newMonth)
+    } else {
+      console.error("UserId is undefined");
+    }
+  }
+
+
+  const handleTableSave = async (entries: Entry[]) => {
+    if (!userId) {
+      console.error("UserId is undefined.");
+      return;
+    }
+    // データのフォーマットを実行します。各フィールドにデフォルト値を設定
+    const formattedEntries = entries.map((entry) => ({
+      day: entry.day,
+      checkIn: entry.checkIn ?? '00:00',
+      checkOut: entry.checkOut ?? '00:00',
+      task: entry.task ?? '未設定',
+      note: entry.note ?? 'なし'
+    }));
+
     try {
-      const docRef = doc(db, "attendance", `${year}-${month}`);
-      await setDoc(docRef, { year, month, entries });
-      alert("データが正常に保存されました。")
-    } catch(error) {
-      console.log("データの保存に失敗しました：", error);
+      const docRef = doc(db, "attendance", `${userId}-${year}-${month.toString().padStart(2, '0')}`);
+      await setDoc(docRef, { entries: formattedEntries }, { merge: true });
+      alert("データが正常に保存されました。");
+    } catch (error) {
+      console.error("データの保存に失敗しました：", error);
       alert("データの保存に失敗しました。エラーを確認してください。");
     }
   };
+
 
   useEffect(() => {
     const tasksQuery = query(collection(db, "tasks"), orderBy("timestamp"));
@@ -294,7 +323,7 @@ function AutoExcelApp() {
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <select value={month} onChange={(e) => setMonth(parseInt(e.target.value, 10))}>
+          <select value={month} onChange={(e) => handleMonthChange(parseInt(e.target.value, 10))} >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>{m}月</option>
             ))}

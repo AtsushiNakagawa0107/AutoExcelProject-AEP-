@@ -83,3 +83,7 @@ tbody tr:nth-child(odd) {
   font-size: 2rem;
   font-weight: bold;
 }
+.db-value {
+  font-size: 0.8em;
+  color: #666;
+}
