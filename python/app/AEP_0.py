@@ -27,6 +27,11 @@ def main(request_body):
     # エクセル編集処理
     func.edit_excel_excel_file_flag_0(parameters)
 
+    # Gメール送信処理
+    mail_address = 'ntnht9hx@gmail.com'
+    app_pass = 'xanesvvloqnwboiz'
+    func.send_g_mail(mail_address, app_pass, mail_address, parameters['target_year'], parameters['target_month'])
+
     # レスポンス返却
     return {"message": f"success AEP_0. select_excel_file_flag {parameters['select_excel_file_flag']}."}
 

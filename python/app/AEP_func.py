@@ -1,6 +1,11 @@
 ## AEP関数群
 import openpyxl
 import logging
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 # ログ設定
 def set_logger(loglevel = "DEBUG"):
@@ -58,3 +63,36 @@ def edit_excel_excel_file_flag_0(parameters):
     wb.save('excel_format/sample_format_updated.xlsx')  # テストが終わったらformat自体上書きに書き換える
     
     return
+
+# Gメール送信処理
+def send_g_mail(mail_address, ap_pass, send_address, target_year, target_month):
+    # メールの作成
+    msg = MIMEMultipart()
+    msg['From'] = mail_address
+    msg['To'] = send_address
+    msg['Subject'] = f'AutoExcelProject {target_year}/{target_month}'
+
+    # メール本文の追加
+    body = 'AutoExcelProjectからの送信'
+    msg.attach(MIMEText(body, 'plain'))
+
+    # 添付ファイルの追加
+    filename = 'excel_format/sample_format_updated.xlsx'
+    attachment = open(filename, 'rb')
+    part = MIMEBase('application', 'octet-stream')
+    part.set_payload((attachment).read())
+    encoders.encode_base64(part)
+    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    msg.attach(part)
+
+    # Gmailに接続してメール送信
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(mail_address, ap_pass)
+        text = msg.as_string()
+        server.sendmail(mail_address, 'recipient_email@example.com', text)
+        server.quit()
+        print('メールが送信されました。')
+    except Exception as e:
+        print('エラーが発生しました:', str(e))
