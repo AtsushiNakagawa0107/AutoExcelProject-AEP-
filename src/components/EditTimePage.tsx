@@ -33,13 +33,7 @@ const EditTimePage: React.FC = () => {
       return;
     }
 
-    // const dateString = `${year}-${month.padStart(2, '0')}-${entry.day.toString().padStart(2, '0')}`;
-    // const attendanceRecord = {
-    //   checkIn: checkIn,
-    //   checkOut: checkOut,
-    // };
-
-    const userDoc = doc(db, "attendance", `${userId}-${year}-${month.toString().padStart(2, '0')}`);
+    const userDoc = doc(db, "users", userId, "attendance", `${year}-${month.toString().padStart(2, '0')}`);
 
     try {
       const docSnapshot = await getDoc(userDoc)

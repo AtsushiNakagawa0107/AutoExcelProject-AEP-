@@ -34,7 +34,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
     const timeStr = formatTime(now);
   
     const docKey = `${yearStr}-${monthStr}-${dayStr}`; // 日付を年月日形式で統一
-    const userDocRef = doc(db, "attendance", `${userId}-${yearStr}-${monthStr}`);
+    const userDocRef = doc(db, "users", userId, "attendance", `${yearStr}-${monthStr}`);
     const docSnapshot = await getDoc(userDocRef);
   
     let currentEntries = docSnapshot.exists() && docSnapshot.data().entries ? docSnapshot.data().entries : {};

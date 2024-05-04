@@ -24,13 +24,13 @@ const LogoutButton = () => {
 
 // TaskInputのpropsの型定義
 
-function TaskInput() {
+function TaskInput({userId}: {userId: string}) {
   const [newTask, setNewTask] = useState<string>('');
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (newTask.trim() !== '') {
-        addDoc(collection(db, "tasks"), {
+        addDoc(collection(db, "users", userId, "tasks"), {
           name: newTask,
           timestamp: serverTimestamp()
         })
@@ -80,7 +80,7 @@ interface Entry {
 function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTableProps &
   {dataUpdated: boolean; setDataUpdated: React.Dispatch<React.SetStateAction<boolean>> }) {
   const navigate = useNavigate();
-  console.log(entries)
+  const [newTask, setNewTask] = useState<string>('');
 
   const handleEdit = (entryIndex: number) => {
     const entry = entries[entryIndex];
@@ -88,7 +88,6 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
       console.error('Entry data is undefined');
       return;
     }
-    console.log(entry)
     navigate(`/edit-time/${userId}/${year}/${month}/${entry.day - 1}`, {state: {
       entry: {
         year: year,
@@ -108,7 +107,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
     }
   
     const adjustedMonth = month.toString().padStart(2, '0');
-    const attendanceDocRef = doc(db, "attendance", `${userId}-${year}-${adjustedMonth}`);
+    const attendanceDocRef = doc(db, "users", userId, "attendance", `${year}-${adjustedMonth}`);
     
     const unsubscribe = onSnapshot(attendanceDocRef, (docSnapshot) => {
       if (!docSnapshot.exists()) {
@@ -116,8 +115,6 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
         setEntries([]);
         return;
       }
-
-      console.log(docSnapshot.data())
 
       const data = docSnapshot.data();
       const entriesFromDb = data.entries || {};
@@ -165,6 +162,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
           const formattedEndTime = formatFirestoreTime(entry.checkOut);
           const formattedTask = formatFirestoreText(entry.task);
           const formattedNote = formatFirestoreText(entry.note);
+          console.log(formattedTask)
           return (
             <tr key={index}>
               <td>{`${month}月${entry.day}日`}</td>
@@ -230,11 +228,15 @@ function AutoExcelApp() {
 
 
   const deleteTask = async (taskId: string) => {
-    await deleteDoc(doc(db, "tasks", taskId));
+    if(userId) {
+      await deleteDoc(doc(db, "users", userId, "tasks", taskId));
+    } else {
+      console.error("userId is undefined");
+    }
   };
 
   const createDefaultEntriesForMonth = async (userId: string, year: number, month: number) => {
-    const docRef = doc(db, "attendance", `${userId}-${year}-${month.toString().padStart(2, '0')}`);
+    const docRef = doc(db, "users", userId, "attendance", `${year}-${month.toString().padStart(2, '0')}`);
     const docSnapshot = await getDoc(docRef);
 
     if (!docSnapshot.exists()) {
@@ -279,7 +281,7 @@ function AutoExcelApp() {
     }));
 
     try {
-      const docRef = doc(db, "attendance", `${userId}-${year}-${month.toString().padStart(2, '0')}`);
+      const docRef = doc(db, "users", userId, "attendance", `${year}-${month.toString().padStart(2, '0')}`);
       await setDoc(docRef, { entries: formattedEntries }, { merge: true });
       alert("データが正常に保存されました。");
     } catch (error) {
@@ -290,12 +292,14 @@ function AutoExcelApp() {
 
 
   useEffect(() => {
-    const tasksQuery = query(collection(db, "tasks"), orderBy("timestamp"));
-    const unsubscribe = onSnapshot(tasksQuery, (snapshot) => {
-      const loadedTasks = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, timestamp: doc.data().timestamp}));
-      setTasks(loadedTasks);
-    })
-    return () => unsubscribe();
+    if (userId) {
+      const tasksQuery = query(collection(db, "users", userId, "tasks"), orderBy("timestamp"));
+      const unsubscribe = onSnapshot(tasksQuery, (snapshot) => {
+        const loadedTasks = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, timestamp: doc.data().timestamp}));
+        setTasks(loadedTasks);
+      })
+      return () => unsubscribe();
+    }
   }, []);
 
   interface LocationState {
@@ -329,19 +333,19 @@ function AutoExcelApp() {
             ))}
           </select>
         </div>
-        <TaskInput />
+        <TaskInput userId={userId!} />
       </div>
       <table>
       <tbody>
-          {tasks.map((task) => (
-            <tr key={task.id}>
-              <td>{task.name}</td>
-              <td>
-                <button onClick={() => deleteTask(task.id)}>削除</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+        {tasks.map((task) => (
+          <tr key={task.id}>
+            <td>{task.name}</td>
+            <td>
+              <button onClick={() => deleteTask(task.id)}>削除</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
       </table>
       <div className='year'>{`${year}年`}</div>
       <DateTable year={year} month={month} tasks={tasks.map(task => task.name)} entries={entries} setEntries={setEntries} userId={userId!} setDataUpdated={setDataUpdated} dataUpdated={dataUpdated} />
