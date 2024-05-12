@@ -30,7 +30,7 @@ def main(request_body):
     # Gメール送信処理
     from_mail_address = 'matikado3594@gmail.com'
     to_mail_address = 'matikado3594@gmail.com'
-    app_pass = 'xanesvvloqnwboiz'
+    app_pass = 'rqxousvfolkwggbh'
     func.send_g_mail(from_mail_address, app_pass, to_mail_address, parameters['target_year'], parameters['target_month'])
 
     # レスポンス返却
