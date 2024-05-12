@@ -65,11 +65,11 @@ def edit_excel_excel_file_flag_0(parameters):
     return
 
 # Gメール送信処理
-def send_g_mail(mail_address, ap_pass, send_address, target_year, target_month):
+def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target_month):
     # メールの作成
     msg = MIMEMultipart()
-    msg['From'] = mail_address
-    msg['To'] = send_address
+    msg['From'] = from_mail_address
+    msg['To'] = to_mail_address
     msg['Subject'] = f'AutoExcelProject {target_year}/{target_month}'
 
     # メール本文の追加
@@ -89,9 +89,9 @@ def send_g_mail(mail_address, ap_pass, send_address, target_year, target_month):
     try:
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
-        server.login(mail_address, ap_pass)
+        server.login(from_mail_address, ap_pass)
         text = msg.as_string()
-        server.sendmail(mail_address, 'recipient_email@example.com', text)
+        server.sendmail(to_mail_address, 'recipient_email@example.com', text)
         server.quit()
         print('メールが送信されました。')
     except Exception as e:
