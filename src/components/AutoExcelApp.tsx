@@ -1,11 +1,13 @@
 import React, { useEffect,useState } from 'react';
 import './AutoExcelApp.css';
+import axios from 'axios';
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { db } from "../firebaseConfig";
 import { collection, addDoc, serverTimestamp, Timestamp, deleteDoc, doc, setDoc, orderBy, onSnapshot, query, getDoc} from 'firebase/firestore';
 import { useNavigate, useLocation, Location } from 'react-router-dom';
 import { formatFirestoreTime } from './utils';
+import  useUserFlag  from './UseUserFlag';
 import { formatFirestoreText } from './taskDisplay';
 
 const LogoutButton = () => {
@@ -225,6 +227,7 @@ function AutoExcelApp() {
   const [dataUpdated, setDataUpdated] = useState(false);
   const navigate = useNavigate();
   const location = useLocation() as Location & { state: LocationState };
+  const selectExcelFileFlag = useUserFlag();
 
 
   const deleteTask = async (taskId: string) => {
@@ -264,6 +267,42 @@ function AutoExcelApp() {
       console.error("UserId is undefined");
     }
   }
+
+  const apiUrl = 'http://localhost:3000/process_data/';
+
+  async function sendDataToAPI(data:any) {
+    try {
+      const response = await axios.post(apiUrl, data);
+      console.log('API Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Request Failed:', error);
+      throw error;
+    }
+  }
+
+  const handleSaveExcel = async () => {
+    const dataToSend = {
+      select_excel_file_flag: selectExcelFileFlag,
+      preset_list: [],
+      target_year: year.toString(),
+      target_month: month.toString().padStart(2, '0'),
+      working_date_list: entries.map(entry => entry.checkIn),
+      closing_date_list: entries.map(entry => entry.checkOut),
+      work_details_list: entries.map(entry => entry.task),
+      remarks_column_list: entries.map(entry => entry.note)
+    };
+
+    try {
+      const result = await sendDataToAPI(dataToSend)
+      console.log('Excel data processed:', result);
+      alert('Excelが処理され、メールが送信されました。');
+    } catch (error) {
+      console.error('Failed to process Excel data:', error);
+      alert('エクセルデータの処理に失敗しました。');
+    }
+  }
+
 
 
   const handleTableSave = async (entries: Entry[]) => {
@@ -349,7 +388,7 @@ function AutoExcelApp() {
       </table>
       <div className='year'>{`${year}年`}</div>
       <DateTable year={year} month={month} tasks={tasks.map(task => task.name)} entries={entries} setEntries={setEntries} userId={userId!} setDataUpdated={setDataUpdated} dataUpdated={dataUpdated} />
-      <button className='submit-button'>送信</button>
+      <button onClick={handleSaveExcel} className='submit-button'>送信</button>
       <button onClick={() => handleTableSave(entries)}>保存</button>
     </div>
   );

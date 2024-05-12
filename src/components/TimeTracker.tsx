@@ -18,7 +18,6 @@ interface Entry {
 
 const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
   const { checkInTime, setCheckInTime, checkOutTime, setCheckOutTime } = useTime();
-  const [entries, setEntries] = useState<Entry[]>([]); // entries状態を追加
 
   const formatTime = (date: Date): string => {
     const hours = date.getHours().toString().padStart(2, '0');
@@ -38,7 +37,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
     const docSnapshot = await getDoc(userDocRef);
   
     let currentEntries = docSnapshot.exists() && docSnapshot.data().entries ? docSnapshot.data().entries : {};
-  
+
     if (!docSnapshot.exists() || Object.keys(currentEntries).length === 0) {
       const daysInMonth = new Date(parseInt(yearStr), parseInt(monthStr), 0).getDate();
       currentEntries = {};
@@ -53,7 +52,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
         };
       }
     }
-  
+
     // 特定の日のデータを更新
     currentEntries[docKey] = currentEntries[docKey] || {
       day: parseInt(dayStr),
@@ -63,12 +62,16 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
       note: ''
     };
     currentEntries[docKey][type] = timeStr;
-  
-    await setDoc(userDocRef, { entries: currentEntries }, { merge: true });
-  
-    alert(`${type === 'checkIn' ? '出勤' : '退勤'}時間が更新されました: ${timeStr}`);
+
+    try {
+      await setDoc(userDocRef, { entries: currentEntries }, { merge: true });
+      alert(`${type === 'checkIn' ? '出勤' : '退勤'}時間が更新されました: ${timeStr}`);
+    } catch (error) {
+      console.error('Error updating document:', error);
+      alert('データの更新中にエラーが発生しました')
+    }
   };
-  
+
 
 
   return (
