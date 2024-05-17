@@ -268,7 +268,7 @@ function AutoExcelApp() {
     }
   }
 
-  const apiUrl = 'http://localhost:3000/process_data/';
+  const apiUrl = 'http://localhost:5000/process_data/';
 
   async function sendDataToAPI(data:any) {
     try {
@@ -281,20 +281,20 @@ function AutoExcelApp() {
     }
   }
 
-  const handleSaveExcel = async () => {
-    const dataToSend = {
-      select_excel_file_flag: selectExcelFileFlag,
-      preset_list: [],
-      target_year: year.toString(),
-      target_month: month.toString().padStart(2, '0'),
-      working_date_list: entries.map(entry => entry.checkIn),
-      closing_date_list: entries.map(entry => entry.checkOut),
-      work_details_list: entries.map(entry => entry.task),
-      remarks_column_list: entries.map(entry => entry.note)
-    };
+  const request_body = {
+    select_excel_file_flag: selectExcelFileFlag,
+    preset_list: [],
+    target_year: year.toString(),
+    target_month: month.toString().padStart(2, '0'),
+    working_date_list: entries.map(entry => entry.checkIn),
+    closing_date_list: entries.map(entry => entry.checkOut),
+    work_details_list: entries.map(entry => entry.task),
+    remarks_column_list: entries.map(entry => entry.note)
+  };
 
+  const handleSaveExcel = async () => {
     try {
-      const result = await sendDataToAPI(dataToSend)
+      const result = await sendDataToAPI(request_body)
       console.log('Excel data processed:', result);
       alert('Excelが処理され、メールが送信されました。');
     } catch (error) {
