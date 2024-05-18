@@ -315,8 +315,8 @@ function AutoExcelApp() {
       day: entry.day,
       checkIn: entry.checkIn ?? '00:00',
       checkOut: entry.checkOut ?? '00:00',
-      task: entry.task ?? '未設定',
-      note: entry.note ?? 'なし'
+      task: entry.task ?? '',
+      note: entry.note ?? ''
     }));
 
     try {
