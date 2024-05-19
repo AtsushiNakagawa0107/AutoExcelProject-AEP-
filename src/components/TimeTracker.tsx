@@ -44,6 +44,8 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${yearStr}-${monthStr}-${day.toString().padStart(2, '0')}`;
         currentEntries[dateStr] = {
+          year: yearStr,
+          month: monthStr,
           day: day,
           checkIn: '00:00',
           checkOut: '00:00',
@@ -54,14 +56,21 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
     }
 
     // 特定の日のデータを更新
-    currentEntries[docKey] = currentEntries[docKey] || {
-      day: parseInt(dayStr),
-      checkIn: '00:00',
-      checkOut: '00:00',
-      task: '',
-      note: ''
-    };
+    if (!currentEntries[docKey]) {
+      currentEntries[docKey] = {
+        year: parseInt(yearStr),
+        month: parseInt(monthStr),
+        day: parseInt(dayStr),
+        checkIn: '00:00',
+        checkOut: '00:00',
+        task: '',
+        note: ''
+      };
+    }
+
+    // 更新処理: 既存の値を保持しつつ、指定された type (checkIn または checkOut) を更新
     currentEntries[docKey][type] = timeStr;
+
 
     try {
       await setDoc(userDocRef, { entries: currentEntries }, { merge: true });

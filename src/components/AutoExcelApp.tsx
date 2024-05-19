@@ -76,6 +76,8 @@ interface Entry {
   checkOut: string | null;
   task: string;
   note: string;
+  year: number;
+  month: number;
 }
 
 
@@ -140,10 +142,43 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
   }, [userId, year, month, db]);
 
 
-  const handleChange = (index: number, field: string, value: string) => {
+  const handleChange = async (index: number, field: string, value: string) => {
     const newEntries = [...entries];
-    newEntries[index] = {...newEntries[index], [field]: value};
+    const entry = newEntries[index];
+
+
+    if (!entry) {
+      console.error("選択されたエントリが存在しません。");
+      return;
+    }
+    console.log('Debug Entry:', entry);
+
+    entry[field] = value;
     setEntries(newEntries);
+
+    const yearStr = entry.year.toString().padStart(4, '0');
+    const monthStr = entry.month.toString().padStart(2, '0');
+    const dayStr = entry.day.toString().padStart(2, '0');
+
+    if (!entry.year || !entry.month || !entry.day) {
+      console.error("日付のデータが存在しません");
+      return;
+    }
+
+    const entryKey = `${yearStr}-${monthStr}-${dayStr}`;
+    const userDocRef = doc(db, "users", userId, "attendance", `${yearStr}-${monthStr}`);
+
+    try {
+      const docSnapshot = await getDoc(userDocRef);
+      if (docSnapshot.exists()) {
+        const entriesData = docSnapshot.data().entries || {};
+        entriesData[entryKey] = {...entriesData[entryKey], [field]: value};
+        await setDoc(userDocRef, {entries: entriesData}, {merge: true});
+        console.log("タスクが更新されました。");
+      }
+    } catch (error) {
+      console.error("タスクの更新中にエラーが発生しました", error);
+    }
   };
 
   return (
@@ -304,32 +339,6 @@ function AutoExcelApp() {
   }
 
 
-
-  const handleTableSave = async (entries: Entry[]) => {
-    if (!userId) {
-      console.error("UserId is undefined.");
-      return;
-    }
-    // データのフォーマットを実行します。各フィールドにデフォルト値を設定
-    const formattedEntries = entries.map((entry) => ({
-      day: entry.day,
-      checkIn: entry.checkIn ?? '00:00',
-      checkOut: entry.checkOut ?? '00:00',
-      task: entry.task ?? '',
-      note: entry.note ?? ''
-    }));
-
-    try {
-      const docRef = doc(db, "users", userId, "attendance", `${year}-${month.toString().padStart(2, '0')}`);
-      await setDoc(docRef, { entries: formattedEntries }, { merge: true });
-      alert("データが正常に保存されました。");
-    } catch (error) {
-      console.error("データの保存に失敗しました：", error);
-      alert("データの保存に失敗しました。エラーを確認してください。");
-    }
-  };
-
-
   useEffect(() => {
     if (userId) {
       const tasksQuery = query(collection(db, "users", userId, "tasks"), orderBy("timestamp"));
@@ -389,7 +398,6 @@ function AutoExcelApp() {
       <div className='year'>{`${year}年`}</div>
       <DateTable year={year} month={month} tasks={tasks.map(task => task.name)} entries={entries} setEntries={setEntries} userId={userId!} setDataUpdated={setDataUpdated} dataUpdated={dataUpdated} />
       <button onClick={handleSaveExcel} className='submit-button'>送信</button>
-      <button onClick={() => handleTableSave(entries)}>保存</button>
     </div>
   );
 }

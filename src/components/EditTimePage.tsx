@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { db } from "../firebaseConfig";
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface Entry {
   year: number;
@@ -9,17 +9,20 @@ interface Entry {
   day: number;
   checkIn: string;
   checkOut: string;
+  task: string;
+  note: string;
 }
 
 const EditTimePage: React.FC = () => {
   const { userId, year, month } = useParams<{ userId: string, year: string, month: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const entry = (location.state as { entry?: Entry }).entry;
+  const entry = location.state?.entry as Entry | undefined;
 
   const [checkIn, setCheckIn] = useState<string>('');
   const [checkOut, setCheckOut] = useState<string>('');
 
+  // 現在のエントリの値をフォームに設定
   useEffect(() => {
     if (entry) {
       setCheckIn(entry.checkIn);
@@ -27,30 +30,32 @@ const EditTimePage: React.FC = () => {
     }
   }, [entry]);
 
+  // 保存処理
   const handleSave = async () => {
     if (!userId || !year || !month || !entry) {
       console.error("Required fields are missing.");
       return;
     }
 
-    const userDoc = doc(db, "users", userId, "attendance", `${year}-${month.toString().padStart(2, '0')}`);
+    const entryKey = `${year.padStart(2, '0')}-${month.padStart(2, '0')}-${entry.day.toString().padStart(2, '0')}`;
 
+    const userDocRef = doc(db, "users", userId, "attendance", `${year}-${month.padStart(2, '0')}`);
     try {
-      const docSnapshot = await getDoc(userDoc)
-      let entries = docSnapshot.exists() ? docSnapshot.data().entries || [] : [];
-      const entryIndex = entries.findIndex((e: Entry) => e.day === entry.day)
+      const docSnapshot = await getDoc(userDocRef);
+      let entriesData = docSnapshot.exists() ? docSnapshot.data().entries || {} : {};
+  
+      const existingEntry = entriesData[entryKey] || {};
       const updatedEntry = {
-        ...entry,
-        checkIn: checkIn,
-        checkOut: checkOut
+        ...existingEntry,
+        checkIn: checkIn || existingEntry.checkIn,
+        checkOut: checkOut || existingEntry.checkOut,
+        task: entry.task ?? existingEntry.task, // undefined なら既存のデータを保持
+        note: entry.note ?? existingEntry.note  // undefined なら既存のデータを保持
       };
-      if (entryIndex > -1) {
-        entries[entryIndex] = updatedEntry;
-      } else {
-        entries.push(updatedEntry);
-      }
-
-      await setDoc(userDoc, { entries }, { merge: true });
+  
+      entriesData[entryKey] = updatedEntry; // 直接キーに対して更新
+  
+      await setDoc(userDocRef, { entries: entriesData }, { merge: true });
       console.log("Document updated successfully");
       navigate('/auto-excel-app', { state: { dateUpdated: true } });
     } catch (error) {
