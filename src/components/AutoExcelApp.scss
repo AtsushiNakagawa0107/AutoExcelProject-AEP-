@@ -1,0 +1,79 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: hsl(0, 2%, 23%);
+}
+.container {
+  width: 100%;
+  margin: auto;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  .header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .inputTask__box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .main-table{
+    font-size: 16px;
+    .item-name{
+      th{
+        text-align: center;
+      }
+    }
+    .select-td{
+      width: 70px;
+      select{
+        width: 100%;
+      }
+      .task-select{
+        display: flex;
+      }
+      .note-select{
+      }
+      .db-value {
+        font-size: 0.8em;
+        color: #666;
+        text-align: center;
+      }
+    }
+    button{
+      font-size: 14px;
+    }
+  }
+
+  .year{
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  .submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #5c6bc0;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+    &:hover {
+      background-color: #3949ab;
+    }
+  }
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px 4px;
+  text-align: left;
+}
+th {
+  background-color: #f2f2f2;
+}
+tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import './GoToDetailPage.scss';
 
 const GoToDetailPage: React.FC = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const GoToDetailPage: React.FC = () => {
 
   return (
     <div>
-      <button onClick={goToAutoExcelApp}>詳細表示</button>
+      <button className='detail-button' onClick={goToAutoExcelApp}>詳細表示</button>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react';
-import './AutoExcelApp.css';
+import './AutoExcelApp.scss';
 import axios from 'axios';
 import { signOut } from "firebase/auth";
 import { auth } from "../firebaseConfig";
@@ -84,7 +84,6 @@ interface Entry {
 function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTableProps &
   {dataUpdated: boolean; setDataUpdated: React.Dispatch<React.SetStateAction<boolean>> }) {
   const navigate = useNavigate();
-  const [newTask, setNewTask] = useState<string>('');
 
   const handleEdit = (entryIndex: number) => {
     const entry = entries[entryIndex];
@@ -92,7 +91,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
       console.error('Entry data is undefined');
       return;
     }
-    navigate(`/edit-time/${userId}/${year}/${month}/${entry.day - 1}`, {state: {
+    navigate(`/edit-time-check/${userId}/${year}/${month}/${entry.day - 1}`, {state: {
       entry: {
         year: year,
         month: month,
@@ -182,9 +181,9 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
   };
 
   return (
-    <table>
+    <table className='main-table'>
       <thead>
-        <tr>
+        <tr className='item-name'>
           <th>日付</th>
           <th>出勤</th>
           <th>退勤</th>
@@ -202,20 +201,20 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
           console.log(formattedTask)
           return (
             <tr key={index}>
-              <td>{`${month}月${entry.day}日`}</td>
-              <td>{formattedStartTime}</td>
-              <td>{formattedEndTime}</td>
-              <td>
-                <select value={entry.task || ''} onChange={(e) => handleChange(index, 'task', e.target.value)}>
-                  <option value="" disabled>選択してください</option>
+              <td className='date'>{`${month}/${entry.day}`}</td>
+              <td className='checkIn-time'>{formattedStartTime}</td>
+              <td className='checkOut-time'>{formattedEndTime}</td>
+              <td className='select-td'>
+                <select className='task-select' value={entry.task || ''} onChange={(e) => handleChange(index, 'task', e.target.value)}>
+                  <option value="" disabled>選択</option>
                   {tasks.map((task, taskIdx) => (
                     <option value={task} key={taskIdx}>{task}</option>
                   ))}
                 </select>
                 {entry.task && <div className='db-value'>{formattedTask}</div>}
               </td>
-              <td>
-                <select value={entry.note || ''} onChange={(e) => handleChange(index, 'note', e.target.value)}>
+              <td className='select-td'>
+                <select className='note-select' value={entry.note || ''} onChange={(e) => handleChange(index, 'note', e.target.value)}>
                   <option value="通常">通常</option>
                   <option value="有給">有給</option>
                   <option value="遅刻">遅刻</option>

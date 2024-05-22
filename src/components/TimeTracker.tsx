@@ -3,6 +3,7 @@ import { db } from '../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useTime } from './TimeContext';
 import GoToDetailPage from './GoToDetailPage';
+import './TimeTracker.scss';
 
 interface TimeTrackerProps {
   userId: string;
@@ -84,12 +85,18 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
 
 
   return (
-    <div>
-      <h1>タイムトラッカー</h1>
-      <button onClick={() => handleAttendanceUpdate('checkIn')}>出勤</button>
-      <button onClick={() => handleAttendanceUpdate('checkOut')}>退勤</button>
-      {checkInTime && <p>出勤時間: {checkInTime.toLocaleTimeString()}</p>}
-      {checkOutTime && <p>退勤時間: {checkOutTime.toLocaleTimeString()}</p>}
+    <div className='timeTracker'>
+      <h1 className='timeTracker-title'>タイムトラッカー</h1>
+      <div className='timeTracker-button'>
+        <button className='checkIn-button' onClick={() => handleAttendanceUpdate('checkIn')}>
+          <img src="/image/出勤.png" alt="出勤" />
+          <p>出勤</p>
+        </button>
+        <button className='checkOut-button' onClick={() => handleAttendanceUpdate('checkOut')}>
+          <img src="/image/退勤.png" alt="退勤" />
+          <p>退勤</p>
+        </button>
+      </div>
       <GoToDetailPage />
     </div>
   );
