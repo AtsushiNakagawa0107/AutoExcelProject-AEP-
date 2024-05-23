@@ -20,11 +20,9 @@ const LogoutButton = () => {
   };
 
   return (
-    <button onClick={handleLogout}>ログアウト</button>
+    <button className='logeOut' onClick={handleLogout}>ログアウト</button>
   )
 }
-
-// TaskInputのpropsの型定義
 
 function TaskInput({userId}: {userId: string}) {
   const [newTask, setNewTask] = useState<string>('');
@@ -47,14 +45,15 @@ function TaskInput({userId}: {userId: string}) {
 };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className='task-input-form' onSubmit={handleSubmit}>
       <input
+        className='task-input'
         type="text"
         value={newTask}
         onChange={(e) => setNewTask(e.target.value)}
         placeholder="新しい作業内容"
       />
-      <button type="submit">作業内容を追加</button>
+      <button className='input-button' type="submit">追加</button>
     </form>
   );
 }
@@ -100,6 +99,18 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
         checkOut: entry.checkOut
       }
     } });
+  }
+
+  const getDayWithWeekday = (day: number) => {
+    const date = new Date(year, month - 1, day);
+    const weekday = date.toLocaleDateString('js-JP', {weekday: 'short'});
+    return `${month}/${day} (${weekday})`;
+  };
+
+  const isWeekday = (day: number) => {
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 || dayOfWeek === 6;
   }
 
 
@@ -198,10 +209,12 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
           const formattedEndTime = formatFirestoreTime(entry.checkOut);
           const formattedTask = formatFirestoreText(entry.task);
           const formattedNote = formatFirestoreText(entry.note);
+          const dayString = getDayWithWeekday(entry.day);
+          const weekendClass = isWeekday(entry.day) ? 'weekend' : '';
           console.log(formattedTask)
           return (
-            <tr key={index}>
-              <td className='date'>{`${month}/${entry.day}`}</td>
+            <tr key={index} className= {weekendClass}>
+              <td className='date'>{dayString}</td>
               <td className='checkIn-time'>{formattedStartTime}</td>
               <td className='checkOut-time'>{formattedEndTime}</td>
               <td className='select-td'>
@@ -239,9 +252,7 @@ function BackToPage() {
     navigate('/');
   }
   return (
-    <div>
-      <button onClick={backToPage}>戻る</button>
-    </div>
+      <button className='backButton' onClick={backToPage}>戻る</button>
   )
 }
 
@@ -363,12 +374,14 @@ function AutoExcelApp() {
   return (
     <div className="container">
       <div className='header'>
-        <h1>Auto Excel Project</h1>
-        <LogoutButton />
-        <BackToPage />
+        <h1 className='header-title'>詳細画面</h1>
+        <div className='header-button'>
+          <LogoutButton />
+          <BackToPage />
+        </div>
       </div>
       <div className="inputTask__box">
-        <div>
+        <div className='date-select-box'>
           <select value={year} onChange={(e) => setYear(parseInt(e.target.value, 10))}>
             {[currentYear - 1, currentYear, currentYear + 1].map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -382,17 +395,17 @@ function AutoExcelApp() {
         </div>
         <TaskInput userId={userId!} />
       </div>
-      <table>
-      <tbody>
-        {tasks.map((task) => (
-          <tr key={task.id}>
-            <td>{task.name}</td>
-            <td>
-              <button onClick={() => deleteTask(task.id)}>削除</button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
+      <table className='task-list'>
+        <tbody>
+          {tasks.map((task) => (
+            <tr key={task.id}>
+              <td>{task.name}</td>
+              <td>
+                <button onClick={() => deleteTask(task.id)}>削除</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
       <div className='year'>{`${year}年`}</div>
       <DateTable year={year} month={month} tasks={tasks.map(task => task.name)} entries={entries} setEntries={setEntries} userId={userId!} setDataUpdated={setDataUpdated} dataUpdated={dataUpdated} />

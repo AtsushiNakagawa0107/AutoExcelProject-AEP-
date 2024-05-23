@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from "../firebaseConfig";
+import './EditTimeFieldPage.scss';
 
 interface Entry {
   year: number;
@@ -70,12 +71,14 @@ const EditTimeFieldPage: React.FC<EditTimeFieldPageProps> = ({ field }) => {
   };
 
   return (
-    <div>
+    <div className='time-flex'>
       <h2>時間を修正: {entry?.day}日</h2>
-      <div>
+      <div className='checkTime'>
         <p>現在の{field === 'checkIn' ? 'チェックイン' : 'チェックアウト'}: {time}</p>
-        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-        <button onClick={handleSave}>保存</button>
+        <div className='time-edit-form'>
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          <button onClick={handleSave}>保存</button>
+        </div>
       </div>
     </div>
   );

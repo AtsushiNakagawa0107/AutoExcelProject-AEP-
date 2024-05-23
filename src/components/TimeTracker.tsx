@@ -18,13 +18,30 @@ interface Entry {
 }
 
 const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
-  const { checkInTime, setCheckInTime, checkOutTime, setCheckOutTime } = useTime();
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const formatTime = (date: Date): string => {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    };
+  }, []);
+
+  const formattedTime = currentTime.toLocaleTimeString('js-JP', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  })
 
   const handleAttendanceUpdate = async (type: 'checkIn' | 'checkOut') => {
     const now = new Date();
@@ -86,7 +103,7 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
 
   return (
     <div className='timeTracker'>
-      <h1 className='timeTracker-title'>タイムトラッカー</h1>
+      <h1 className='timeTracker-title'>{formattedTime}</h1>
       <div className='timeTracker-button'>
         <button className='checkIn-button' onClick={() => handleAttendanceUpdate('checkIn')}>
           <img src="/image/出勤.png" alt="出勤" />
