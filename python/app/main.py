@@ -10,6 +10,8 @@ app = FastAPI()
 # CORS設定
 origins = [
     "http://localhost:3000",  # ReactアプリのURLを指定
+    "http://autoexcelapp.starfree.jp",
+    "https://autoexcelproject-aep.onrender.com"
 ]
 app.add_middleware(
     CORSMiddleware,
