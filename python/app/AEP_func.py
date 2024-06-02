@@ -60,9 +60,10 @@ def edit_excel_excel_file_flag_0(parameters):
         active_cell.value = remarks_column_str
 
     # Excelファイルを保存
-    wb.save(f'excel_format/{target_month}月作業報告書.xlsx')
-    wb.save(f'excel_format/sample_format_bk.xlsx')
-    wb.save(f'excel_format/sample_format.xlsx')
+    excel_name = '{target_month}月作業報告書.xlsx'
+    wb.save(f'excel_format/{excel_name}')
+    wb.save('excel_format/sample_format_bk.xlsx')
+    wb.save('excel_format/sample_format.xlsx')
     
     return
 
@@ -76,13 +77,14 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target
 
     # メール本文の追加
     body = f'''お疲れ様です。
-    {target_month}月分の作業報告書になります。
-    よろしくお願いします。
-    '''
+{target_month}月分の作業報告書になります。
+よろしくお願いします。
+'''
     msg.attach(MIMEText(body, 'plain'))
 
     # 添付ファイルの追加
-    filename = f'excel_format/{target_month}月作業報告書.xlsx'
+    excel_name = '{target_month}月作業報告書.xlsx'
+    filename = f'excel_format/{excel_name}'
     attachment = open(filename, 'rb')
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((attachment).read())
