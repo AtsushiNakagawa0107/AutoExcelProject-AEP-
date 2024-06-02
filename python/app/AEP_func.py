@@ -60,7 +60,9 @@ def edit_excel_excel_file_flag_0(parameters):
         active_cell.value = remarks_column_str
 
     # Excelファイルを保存
-    wb.save('excel_format/sample_format_updated.xlsx')  # テストが終わったらformat自体上書きに書き換える
+    wb.save(f'excel_format/{target_month}月作業報告書.xlsx')
+    wb.save(f'excel_format/sample_format_bk.xlsx')
+    wb.save(f'excel_format/sample_format.xlsx')
     
     return
 
@@ -70,14 +72,17 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target
     msg = MIMEMultipart()
     msg['From'] = from_mail_address
     msg['To'] = to_mail_address
-    msg['Subject'] = f'AutoExcelProject {target_year}/{target_month}'
+    msg['Subject'] = f'{target_month}月作業報告書'
 
     # メール本文の追加
-    body = 'AutoExcelProjectからの送信'
+    body = f'''お疲れ様です。
+    {target_month}月分の作業報告書になります。
+    よろしくお願いします。
+    '''
     msg.attach(MIMEText(body, 'plain'))
 
     # 添付ファイルの追加
-    filename = 'excel_format/sample_format_updated.xlsx'
+    filename = f'excel_format/{target_month}月作業報告書.xlsx'
     attachment = open(filename, 'rb')
     part = MIMEBase('application', 'octet-stream')
     part.set_payload((attachment).read())
