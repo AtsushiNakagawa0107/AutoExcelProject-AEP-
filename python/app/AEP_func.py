@@ -6,6 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from email.header import Header
+import os
 
 # ログ設定
 def set_logger(loglevel = "DEBUG"):
@@ -25,11 +27,18 @@ def edit_excel_excel_file_flag_0(parameters):
     # コピー元のシートを取得
     source_sheet = wb['FM※コピーして使用']
 
+    # 新しいシートの名前を指定した形式に変更
+    new_sheet_name = f'{target_year}年{target_month}月'
+
+    # 既に同名のシートが存在する場合は削除
+    if new_sheet_name in wb.sheetnames:
+        del wb[new_sheet_name]
+    
     # 新しいシートをコピー元のシートの後ろに挿入
     new_sheet = wb.copy_worksheet(source_sheet)
 
     # 新しいシートの名前を指定した形式に変更
-    new_sheet.title = f'{target_year}年{target_month}月'
+    new_sheet.title = new_sheet_name
 
     # A8セルをYYYY/MM/DD形式に編集
     date_str = f'{target_year}/{target_month}/1'  # YYYY/MM/01形式の文字列
@@ -60,9 +69,8 @@ def edit_excel_excel_file_flag_0(parameters):
         active_cell.value = remarks_column_str
 
     # Excelファイルを保存
-    excel_name = '{target_month}月作業報告書.xlsx'
-    wb.save(f'excel_format/{excel_name}')
-    wb.save('excel_format/sample_format_bk.xlsx')
+    excel_name = f'{target_month}月作業報告書.xlsx'
+    wb.save(f'excel_format/backup/{excel_name}')
     wb.save('excel_format/sample_format.xlsx')
     
     return
@@ -83,13 +91,16 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target
     msg.attach(MIMEText(body, 'plain'))
 
     # 添付ファイルの追加
-    excel_name = '{target_month}月作業報告書.xlsx'
-    filename = f'excel_format/{excel_name}'
+    excel_name = f'{target_month}月作業報告書.xlsx'
+    filename = f'excel_format/backup/{excel_name}'
     attachment = open(filename, 'rb')
     part = MIMEBase('application', 'octet-stream')
-    part.set_payload((attachment).read())
+    part.set_payload(attachment.read())
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+
+    # 日本語ファイル名を適切にエンコードしてヘッダーを追加
+    encoded_filename = Header(excel_name, 'utf-8').encode()
+    part.add_header('Content-Disposition', 'attachment', filename=encoded_filename)
     msg.attach(part)
 
     # Gmailに接続してメール送信
@@ -98,7 +109,7 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target
         server.starttls()
         server.login(from_mail_address, ap_pass)
         text = msg.as_string()
-        server.sendmail(to_mail_address, 'recipient_email@example.com', text)
+        server.sendmail(from_mail_address, to_mail_address, text)
         server.quit()
         print('メールが送信されました。')
     except Exception as e:
