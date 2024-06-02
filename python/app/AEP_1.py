@@ -34,7 +34,7 @@ def main(request_body):
     func.send_g_mail(from_mail_address, app_pass, to_mail_address, parameters['target_year'], parameters['target_month'])
 
     # レスポンス返却
-    return {"message": f"success AEP_0. select_excel_file_flag {parameters['select_excel_file_flag']}."}
+    return {"message": f"success AEP_1. select_excel_file_flag {parameters['select_excel_file_flag']}."}
 
 if __name__ == "__main__":
     # FastAPIからのリクエストボディを取得
