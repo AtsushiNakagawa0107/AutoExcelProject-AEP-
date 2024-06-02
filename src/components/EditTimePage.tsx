@@ -34,7 +34,6 @@ const EditTimePage: React.FC = () => {
       return;
     }
     const fetchEntry = async () => {
-      console.log(`Year: ${year}, Month: ${month}, Day: ${day}`);
       const entryKey = `${year}-${month}-${day}`;
       const userDocRef = doc(db, "users", userId, "attendance", `${year}-${month}`);
       const docSnapshot = await getDoc(userDocRef);

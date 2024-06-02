@@ -28,6 +28,12 @@
       button{
         font-size: 25px;
         font-weight: bold;
+        &:active{
+          -webkit-transform: translate(0,2px);
+          -moz-transform: translate(0,2px);
+          transform: translate(0,2px);
+          border-bottom:none;
+        }
       }
     }
   }

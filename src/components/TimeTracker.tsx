@@ -106,11 +106,11 @@ const TimeTracker: React.FC<TimeTrackerProps> = ({ userId }) => {
       <h1 className='timeTracker-title'>{formattedTime}</h1>
       <div className='timeTracker-button'>
         <button className='checkIn-button' onClick={() => handleAttendanceUpdate('checkIn')}>
-          <img src="/image/出勤.png" alt="出勤" />
+          <img src="/image/shukkin.png" alt="出勤" />
           <p>出勤</p>
         </button>
         <button className='checkOut-button' onClick={() => handleAttendanceUpdate('checkOut')}>
-          <img src="/image/退勤.png" alt="退勤" />
+          <img src="/image/taikin.png" alt="退勤" />
           <p>退勤</p>
         </button>
       </div>

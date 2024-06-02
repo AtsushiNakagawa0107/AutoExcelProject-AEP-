@@ -9,6 +9,7 @@ import { useNavigate, useLocation, Location } from 'react-router-dom';
 import { formatFirestoreTime } from './utils';
 import  useUserFlag  from './UseUserFlag';
 import { formatFirestoreText } from './taskDisplay';
+import LoadingModal from './LoadingModal';
 
 const LogoutButton = () => {
   const handleLogout = () => {
@@ -86,15 +87,16 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
 
   const handleEdit = (entryIndex: number) => {
     const entry = entries[entryIndex];
+    console.log(entry.day - 1)
     if (!entry) {
       console.error('Entry data is undefined');
       return;
     }
-    navigate(`/edit-time-check/${userId}/${year}/${month}/${entry.day - 1}`, {state: {
+    navigate(`/edit-time-check/${userId}/${year}/${month}/${entry.day}`, {state: {
       entry: {
         year: year,
         month: month,
-        day: entry.day - 1,
+        day: entry.day,
         checkIn: entry.checkIn,
         checkOut: entry.checkOut
       }
@@ -236,7 +238,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
                 {entry.note && <div className='db-value'>{formattedNote}</div>}
               </td>
               <td>
-                <button onClick={() => handleEdit(entry.day)}>修正</button>
+                <button onClick={() => handleEdit(index)}>修正</button>
               </td>
             </tr>
           )
@@ -273,6 +275,9 @@ function AutoExcelApp() {
   const navigate = useNavigate();
   const location = useLocation() as Location & { state: LocationState };
   const selectExcelFileFlag = useUserFlag();
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [completed, setCompleted] = useState(false);
 
 
   const deleteTask = async (taskId: string) => {
@@ -338,13 +343,32 @@ function AutoExcelApp() {
   };
 
   const handleSaveExcel = async () => {
+    setLoading(true);
+    setProgress(0);
+    setCompleted(false);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const next = prev + 10;
+        return next <= 90 ? next : prev;
+      });
+    }, 1000);
+
+
     try {
       const result = await sendDataToAPI(request_body)
       console.log('Excel data processed:', result);
-      alert('Excelが処理され、メールが送信されました。');
+      setCompleted(true);
+      setProgress(100);
+      setTimeout(() => {
+        setLoading(false);
+        setProgress(0);
+      }, 3000)
     } catch (error) {
       console.error('Failed to process Excel data:', error);
       alert('エクセルデータの処理に失敗しました。');
+    } finally {
+      clearInterval(interval);
     }
   }
 
@@ -409,7 +433,10 @@ function AutoExcelApp() {
       </table>
       <div className='year'>{`${year}年`}</div>
       <DateTable year={year} month={month} tasks={tasks.map(task => task.name)} entries={entries} setEntries={setEntries} userId={userId!} setDataUpdated={setDataUpdated} dataUpdated={dataUpdated} />
-      <button onClick={handleSaveExcel} className='submit-button'>送信</button>
+      <button onClick={handleSaveExcel} className='submit-button' disabled={loading}>
+        {loading ? '処理中' : '送信'}
+      </button>
+      <LoadingModal loading={loading} progress={progress} completed={completed}/>
     </div>
   );
 }
