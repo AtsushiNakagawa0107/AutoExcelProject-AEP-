@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from email.header import Header
-import os
+import xlwings as xw
 
 # ログ設定
 def set_logger(loglevel = "DEBUG"):
@@ -18,11 +18,14 @@ def set_logger(loglevel = "DEBUG"):
 # エクセル編集処理(佐藤用)
 def edit_excel_excel_file_flag_0(parameters):
     # 変数設定
-    target_year = parameters['target_year']
-    target_month = parameters['target_month']
+    target_year = parameters['target_year']                 # 年
+    target_month = parameters['target_month']               # 月
+    excel_name = f'{target_month}月作業報告書.xlsx'          # Excelファイル名 
+    excel_file = f'excel_format/backup/{excel_name}'        # Excelファイルパス
+    format_excel_file = 'excel_format/sample_format.xlsx'   # Excelフォーマットパス
 
     # Excelファイルを開く
-    wb = openpyxl.load_workbook('excel_format/sample_format.xlsx')
+    wb = openpyxl.load_workbook(format_excel_file)
 
     # コピー元のシートを取得
     source_sheet = wb['FM※コピーして使用']
@@ -41,7 +44,8 @@ def edit_excel_excel_file_flag_0(parameters):
     new_sheet.title = new_sheet_name
 
     # A8セルをYYYY/MM/DD形式に編集
-    date_str = f'{target_year}/{target_month}/1'  # YYYY/MM/01形式の文字列
+    int_month = int(target_month)               # 先頭の0を除外
+    date_str = f'{target_year}/{int_month}/1'   # YYYY/MM/01形式の文字列
     active_cell = new_sheet['A8']
     active_cell.value = date_str
     active_cell.number_format = 'yyyy"年"m"月"'
@@ -69,9 +73,28 @@ def edit_excel_excel_file_flag_0(parameters):
         active_cell.value = remarks_column_str
 
     # Excelファイルを保存
-    excel_name = f'{target_month}月作業報告書.xlsx'
-    wb.save(f'excel_format/backup/{excel_name}')
-    wb.save('excel_format/sample_format.xlsx')
+    wb.save(excel_file)
+    wb.save(format_excel_file)
+
+    ### ここから A8セルの書式がうまく反映されないための対処処理↓ ###
+
+    # Excelアプリケーションを起動
+    app = xw.App(visible=False)
+    wb = app.books.open(excel_file)  # Excelファイルを開く
+    ws = wb.sheets[new_sheet_name]
+
+    # A8セルをYYYY/MM/DD形式に編集
+    ws.range('A8').value = date_str
+    # ユーザー定義の書式設定を適用
+    ws.range('A8').number_format = 'yyyy"年"m"月"'
+
+    # Excelファイルを保存
+    wb.save(excel_file)
+    wb.save(format_excel_file)
+
+    # Excelアプリケーションを閉じる
+    wb.close()
+    app.quit()
     
     return
 
