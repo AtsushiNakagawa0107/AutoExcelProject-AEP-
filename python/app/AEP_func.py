@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from email.header import Header
-import xlwings as xw
 
 # ログ設定
 def set_logger(loglevel = "DEBUG"):
@@ -75,26 +74,6 @@ def edit_excel_excel_file_flag_0(parameters):
     # Excelファイルを保存
     wb.save(excel_file)
     wb.save(format_excel_file)
-
-    ### ここから A8セルの書式がうまく反映されないための対処処理↓ ###
-
-    # Excelアプリケーションを起動
-    app = xw.App(visible=False)
-    wb = app.books.open(excel_file)  # Excelファイルを開く
-    ws = wb.sheets[new_sheet_name]
-
-    # A8セルをYYYY/MM/DD形式に編集
-    ws.range('A8').value = date_str
-    # ユーザー定義の書式設定を適用
-    ws.range('A8').number_format = 'yyyy"年"m"月"'
-
-    # Excelファイルを保存
-    wb.save(excel_file)
-    wb.save(format_excel_file)
-
-    # Excelアプリケーションを閉じる
-    wb.close()
-    app.quit()
     
     return
 
