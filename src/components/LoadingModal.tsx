@@ -5,9 +5,10 @@ interface ModalProps {
   loading: boolean;
   progress: number;
   completed: boolean;
+  message: string;
 }
 
-const LoadingModal: React.FC<ModalProps> = ({ loading, progress, completed }) => {
+const LoadingModal: React.FC<ModalProps> = ({ loading, progress, completed, message }) => {
   if (!loading) {
     return null;
   }
@@ -17,13 +18,13 @@ const LoadingModal: React.FC<ModalProps> = ({ loading, progress, completed }) =>
       <div className="modal-content">
         {!completed ? (
           <>
-            <p>処理中...</p>
+            <p>{message}</p>
             <div className="progress-bar-container">
               <div className="progress-bar" style={{ width: `${progress}%` }}></div>
             </div>
           </>
         ) : (
-          <p className="modal-completed">送信が完了しました</p>
+          <p className="modal-completed">{message}</p>
         )}
       </div>
     </div>

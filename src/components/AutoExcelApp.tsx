@@ -163,9 +163,8 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
       console.error("選択されたエントリが存在しません。");
       return;
     }
-    console.log('Debug Entry:', entry);
 
-    entry[field] = value;
+    entry[field] = value === '選択' ? '' : value;
     setEntries(newEntries);
 
     const yearStr = entry.year.toString().padStart(4, '0');
@@ -184,7 +183,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
       const docSnapshot = await getDoc(userDocRef);
       if (docSnapshot.exists()) {
         const entriesData = docSnapshot.data().entries || {};
-        entriesData[entryKey] = {...entriesData[entryKey], [field]: value};
+        entriesData[entryKey] = {...entriesData[entryKey], [field]: value === '選択' ? '' : value};
         await setDoc(userDocRef, {entries: entriesData}, {merge: true});
         console.log("タスクが更新されました。");
       }
@@ -278,6 +277,7 @@ function AutoExcelApp() {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [modalMessage, setModalMessage] = useState('送信中...');
 
 
   const deleteTask = async (taskId: string) => {
@@ -299,6 +299,9 @@ function AutoExcelApp() {
       for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         defaultEntries[dateStr] = {
+          month: month.toString().padStart(2, '0'),
+          year: year,
+          day: day,
           checkIn: '00:00',
           checkOut: '00:00',
           task: '',
@@ -346,6 +349,7 @@ function AutoExcelApp() {
     setLoading(true);
     setProgress(0);
     setCompleted(false);
+    setModalMessage('送信中...');
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -360,17 +364,19 @@ function AutoExcelApp() {
       console.log('Excel data processed:', result);
       setCompleted(true);
       setProgress(100);
+      setModalMessage('送信完了しました');
+    } catch (error) {
+      console.error('Failed to process Excel data:', error);
+      setCompleted(true);
+      setModalMessage('送信に失敗しました');
+    } finally {
+      clearInterval(interval);
       setTimeout(() => {
         setLoading(false);
         setProgress(0);
-      }, 3000)
-    } catch (error) {
-      console.error('Failed to process Excel data:', error);
-      alert('エクセルデータの処理に失敗しました。');
-    } finally {
-      clearInterval(interval);
+      }, 3000);
     }
-  }
+  };
 
 
   useEffect(() => {
@@ -436,7 +442,7 @@ function AutoExcelApp() {
       <button onClick={handleSaveExcel} className='submit-button' disabled={loading}>
         {loading ? '処理中' : '送信'}
       </button>
-      <LoadingModal loading={loading} progress={progress} completed={completed}/>
+      <LoadingModal loading={loading} progress={progress} completed={completed} message={modalMessage}/>
     </div>
   );
 }
