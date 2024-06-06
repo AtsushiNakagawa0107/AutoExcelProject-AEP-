@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from email.header import Header
+import datetime
 
 # ログ設定
 def set_logger(loglevel = "DEBUG"):
@@ -43,12 +44,28 @@ def edit_excel_excel_file_flag_0(parameters):
     new_sheet.title = new_sheet_name
 
     # A8セルをYYYY/MM/DD形式に編集
-    int_month = int(target_month)               # 先頭の0を除外
-    date_str = f'{target_year}/{int_month}/1'   # YYYY/MM/01形式の文字列
+    int_month = int(target_month)                # 先頭の0を除外
+    date_str = f'{target_year}年{int_month}月'   # YYYY/MM/01形式の文字列
     active_cell = new_sheet['A8']
     active_cell.value = date_str
     active_cell.number_format = 'yyyy"年"m"月"'
-    
+
+    # A9セル以降をA39セルまで空白にする
+    for i in range(9, 40):
+        cell = new_sheet[f'A{i}']
+        cell.value = ""
+
+    # A9セル以降をM月D日(weekday)形式に編集
+    int_target_year = int(target_year)          # int型に変換
+    days_in_month = (datetime.date(int_target_year, int_month + 1, 1) - datetime.date(int_target_year, int_month, 1)).days # 月の日数を取得
+    for day in range(1, days_in_month + 1):
+        target_date = datetime.date(int_target_year, int_month, day)
+        weekday = target_date.strftime('%a')
+        date_str = target_date.strftime(f"{int_month}月{day}日")
+        date_str = f"{date_str}({weekday})"
+        cell = new_sheet[f'A{8 + day}']
+        cell.value = date_str
+
     # B9セル以降を編集 (出勤)
     for i, working_str in enumerate(parameters['working_date_list'], start=9):
         active_cell = new_sheet[f'B{i}']
