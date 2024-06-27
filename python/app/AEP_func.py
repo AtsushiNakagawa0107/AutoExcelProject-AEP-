@@ -148,7 +148,9 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, cc_mail_address, ta
         server.starttls()
         server.login(from_mail_address, ap_pass)
         text = msg.as_string()
-        server.sendmail(from_mail_address, to_mail_address, cc_mail_address, text)
+        # 送信先リストを作成（To + CC）
+        recipient_list = [to_mail_address] + cc_mail_address.split(',')
+        server.sendmail(from_mail_address, recipient_list, text)
         server.quit()
         print('メールが送信されました。')
     except Exception as e:
