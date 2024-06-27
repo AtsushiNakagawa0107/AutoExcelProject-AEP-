@@ -30,8 +30,9 @@ def main(request_body):
     # Gメール送信処理
     from_mail_address = 'matikado3594@gmail.com'
     to_mail_address = 'matikado3594@gmail.com'
+    cc_mail_address = 'ntnht9hx@gmail.com'
     app_pass = 'rqxousvfolkwggbh'
-    func.send_g_mail(from_mail_address, app_pass, to_mail_address, parameters['target_year'], parameters['target_month'])
+    func.send_g_mail(from_mail_address, app_pass, to_mail_address, cc_mail_address, parameters['target_year'], parameters['target_month'])
 
     # レスポンス返却
     return {"message": f"success AEP_0. select_excel_file_flag {parameters['select_excel_file_flag']}."}

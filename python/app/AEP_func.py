@@ -114,11 +114,12 @@ def edit_excel_excel_file_flag_0(parameters):
     return
 
 # Gメール送信処理
-def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target_month):
+def send_g_mail(from_mail_address, cc_mail_address, ap_pass, to_mail_address, target_year, target_month):
     # メールの作成
     msg = MIMEMultipart()
     msg['From'] = from_mail_address
     msg['To'] = to_mail_address
+    msg['CC'] = cc_mail_address
     msg['Subject'] = f'{target_month}月作業報告書'
 
     # メール本文の追加
@@ -147,7 +148,7 @@ def send_g_mail(from_mail_address, ap_pass, to_mail_address, target_year, target
         server.starttls()
         server.login(from_mail_address, ap_pass)
         text = msg.as_string()
-        server.sendmail(from_mail_address, to_mail_address, text)
+        server.sendmail(from_mail_address, to_mail_address, cc_mail_address, text)
         server.quit()
         print('メールが送信されました。')
     except Exception as e:
