@@ -114,7 +114,7 @@ def edit_excel_excel_file_flag_0(parameters):
     return
 
 # Gメール送信処理
-def send_g_mail(from_mail_address, cc_mail_address, ap_pass, to_mail_address, target_year, target_month):
+def send_g_mail(from_mail_address, ap_pass, to_mail_address, cc_mail_address, target_year, target_month):
     # メールの作成
     msg = MIMEMultipart()
     msg['From'] = from_mail_address
