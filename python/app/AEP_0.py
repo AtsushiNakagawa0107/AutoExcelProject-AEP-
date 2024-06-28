@@ -28,7 +28,7 @@ def main(request_body):
     func.edit_excel_excel_file_flag_0(parameters)
 
     # Gメール送信処理
-    from_mail_address = 'daiki.sato@ysinc.co.jp'
+    from_mail_address = 'matikado3594@gmail.com'
     to_mail_address = '	soumu@ysinc.co.jp'
     cc_mail_address = '	kazuya.masuoka@ysinc.co.jp'
     app_pass = 'rqxousvfolkwggbh'
