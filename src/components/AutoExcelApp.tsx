@@ -233,6 +233,7 @@ function DateTable({ year, month, tasks, entries, setEntries, userId }: DateTabl
                   <option value="有給">有給</option>
                   <option value="遅刻">遅刻</option>
                   <option value="早退">早退</option>
+                  <option value="夏季休暇">夏季休暇</option>
                 </select>
                 {entry.note && <div className='db-value'>{formattedNote}</div>}
               </td>
